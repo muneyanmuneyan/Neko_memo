@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ねこの体調メモ</title>
+  <script src="js/jquery-2.1.3.min.js"></script>
+  <!-- 丸くてやわらかいフォント（Google Fonts） -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <h1>
+    <span class="title-badge">ねこの体調メモ</span>
+    <span class="subtitle">きょうも元気</span>
+  </h1>
+
+  <!-- =========================================
+       STEP1：毎日の体調チェック（入力フォーム）
+       ========================================= -->
+  <main>
+    <div class="input-area">
+
+      <label class="field-label" for="date">日付</label>
+      <input id="date" type="date">
+
+      <!-- ごはん（2列で表示） -->
+      <div class="check-row">
+        <span class="field-label">ごはん</span>
+        <div class="choices">
+          <input type="radio" name="appetite" id="appetite-1" value="カリカリ"><label for="appetite-1">カリカリ</label>
+          <input type="radio" name="appetite" id="appetite-2" value="カリカリ＋ウェット"><label for="appetite-2">カリカリ<br>＋ウェット</label>
+          <input type="radio" name="appetite" id="appetite-3" value="カリカリ＋ウェット＋チュール"><label for="appetite-3">カリカリ＋ウェット<br>＋チュール</label>
+          <input type="radio" name="appetite" id="appetite-4" value="食欲なし"><label for="appetite-4">食欲なし</label>
+        </div>
+      </div>
+
+      <!-- ご機嫌（2列で表示） -->
+      <div class="check-row">
+        <span class="field-label">ご機嫌</span>
+        <div class="choices">
+          <input type="radio" name="energy" id="energy-1" value="おしゃべり"><label for="energy-1">😺 おしゃべり</label>
+          <input type="radio" name="energy" id="energy-2" value="窓際警備"><label for="energy-2">🪟 窓際警備</label>
+          <input type="radio" name="energy" id="energy-3" value="おやつ欲しい"><label for="energy-3">🐟 おやつ欲しい</label>
+          <input type="radio" name="energy" id="energy-4" value="寝たい"><label for="energy-4">😴 寝たい</label>
+        </div>
+      </div>
+
+      <!-- うんち（絵文字＋小さい文字、4列で表示） -->
+      <div class="check-row">
+        <span class="field-label">うんち</span>
+        <div class="choices icon-choices">
+          <input type="radio" name="poop" id="poop-1" value="いいうんち">
+          <label for="poop-1"><span class="icon">💩</span><span class="icon-text">いいうんち</span></label>
+          <input type="radio" name="poop" id="poop-2" value="ゆるい">
+          <label for="poop-2"><span class="icon">💦</span><span class="icon-text">ゆるい</span></label>
+          <input type="radio" name="poop" id="poop-3" value="かたい">
+          <label for="poop-3"><span class="icon">🪨</span><span class="icon-text">かたい</span></label>
+          <input type="radio" name="poop" id="poop-4" value="出てない">
+          <label for="poop-4"><span class="icon">🚫</span><span class="icon-text">出てない</span></label>
+        </div>
+      </div>
+
+      <!-- おしっこ（絵文字＋小さい文字、4列で表示） -->
+      <div class="check-row">
+        <span class="field-label">おしっこ</span>
+        <div class="choices icon-choices">
+          <input type="radio" name="pee" id="pee-1" value="ふつう">
+          <label for="pee-1"><span class="icon">💧</span><span class="icon-text">ふつう</span></label>
+          <input type="radio" name="pee" id="pee-2" value="多い">
+          <label for="pee-2"><span class="icon">🌊</span><span class="icon-text">多い</span></label>
+          <input type="radio" name="pee" id="pee-3" value="少ない">
+          <label for="pee-3"><span class="icon">🤏</span><span class="icon-text">少ない</span></label>
+          <input type="radio" name="pee" id="pee-4" value="出てない">
+          <label for="pee-4"><span class="icon">🚫</span><span class="icon-text">出てない</span></label>
+        </div>
+      </div>
+
+      <label class="field-label" for="weight">体重（kg）</label>
+      <input id="weight" type="number" step="0.01" min="0" placeholder="例：4.25">
+
+      <label class="field-label" for="memo">メモ</label>
+      <textarea id="memo" placeholder="気になったこと（吐いた、よく寝ていた など）"></textarea>
+    </div>
+
+    <div class="button-area">
+      <button id="save">セーブ</button>
+      <button id="clear">全て削除</button>
+    </div>
+  </main>
+
+  <!-- STEP3-2：カレンダー -->
+  <h2 class="section-title"><span class="title-icon">📅</span>カレンダー</h2>
+  <div class="calendar">
+    <p class="hint">🐱 保存した記録を直したいときは、カレンダーで修正したい日付を選んで再度セーブするにゃ</p>
+    <div class="calendar-header">
+      <button id="prev-month">＜</button>
+      <span id="calendar-title"></span>
+      <button id="next-month">＞</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th class="sun">日</th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th><th class="sat">土</th>
+        </tr>
+      </thead>
+      <tbody id="calendar-body">
+        <!-- ここに日付が挿入される -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- STEP3-1：体重グラフ -->
+  <h2 class="section-title"><span class="title-icon">⚖️</span>体重グラフ（最新14件）</h2>
+  <div class="chart-area">
+    <canvas id="weight-chart"></canvas>
+  </div>
+
+  <!-- STEP2：記録一覧 -->
+  <h2 class="section-title"><span class="title-icon">📝</span>記録一覧</h2>
+  <ul id="list">
+    <!-- ここに追加データが挿入される -->
+  </ul>
+
+  <footer>
+    &copy; 2026 Office Tanuki
+  </footer>
+
+  <!-- 以下にjsを書いていきます -->
+  <script>
+
+    // =========================================
+    // 共通で使うもの
+    // =========================================
+
+    // 他のメモと混ざらないよう、保存するキーの頭に付ける目印
+    const PREFIX = "cat-";
+
+    // Dateを "2026-11-20" の形の文字列にする
+    function toDateStr(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    // localStorage から猫の記録だけを取り出し、日付の古い順に並べて返す
+    function getRecords() {
+      const records = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.indexOf(PREFIX) === 0) {
+          // 保存した文字列(JSON)をオブジェクトに戻す
+          const record = JSON.parse(localStorage.getItem(key));
+          records.push(record);
+        }
+      }
+      records.sort(function (a, b) {
+        return a.date < b.date ? -1 : 1;
+      });
+      return records;
+    }
+
+    // 一覧に表示するときの絵文字
+    const ICONS = {
+      // ご機嫌
+      "おしゃべり": "😺",
+      "窓際警備": "🪟",
+      "おやつ欲しい": "🐟",
+      "寝たい": "😴",
+      // うんち
+      "いいうんち": "💩",
+      "ゆるい": "💦",
+      "かたい": "🪨",
+      // おしっこ
+      "ふつう": "💧",
+      "多い": "🌊",
+      "少ない": "🤏",
+      // 共通
+      "出てない": "🚫"
+    };
+
+    // 気をつけたい値（一覧で赤字になる）
+    const WARN_VALUES = ["食欲なし", "ゆるい", "かたい", "出てない", "多い", "少ない"];
+
+    // 値を表示用の文字にする（絵文字を付けて、要注意なら赤字）
+    function mark(value) {
+      if (!value) {
+        return "-";
+      }
+      const icon = ICONS[value] ? ICONS[value] + " " : "";
+      if (WARN_VALUES.indexOf(value) !== -1) {
+        return `<span class="warn">${icon}${value}</span>`;
+      }
+      return icon + value;
+    }
+
+    // 画面をまとめて更新する
+    function renderAll() {
+      renderList();
+      drawWeightChart();
+      renderCalendar();
+    }
+
+
+    // =========================================
+    // STEP2：保存・削除・一覧表示（localStorage）
+    // =========================================
+
+    // 1.Save クリックイベント
+    $("#save").on("click", function () {
+      const date = $("#date").val();
+      if (date === "") {
+        alert("日付を入力してください");
+        return;
+      }
+
+      // 入力内容を1つのオブジェクトにまとめる
+      const record = {
+        date: date,
+        appetite: $('input[name="appetite"]:checked').val() || "",
+        energy: $('input[name="energy"]:checked').val() || "",
+        poop: $('input[name="poop"]:checked').val() || "",
+        pee: $('input[name="pee"]:checked').val() || "",
+        weight: $("#weight").val(),
+        memo: $("#memo").val()
+      };
+
+      // オブジェクトは文字列(JSON)にしてから保存する
+      // 同じ日付で保存すると上書き（＝修正）になる
+      localStorage.setItem(PREFIX + date, JSON.stringify(record));
+      renderAll();
+      alert("保存しました");
+
+      // 次の入力ができるように、表示をリセットする
+      resetForm();                        // 選択・体重・メモを空にする
+      $("#date").val(toDateStr(today));   // 日付は今日に戻す
+      $("html, body").animate({ scrollTop: 0 }, 300); // 一番上へ戻る
+    });
+
+    // 2.clear クリックイベント（猫の記録だけを消す）
+    $("#clear").on("click", function () {
+      if (!confirm("全ての記録を削除しますか？")) {
+        return;
+      }
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.indexOf(PREFIX) === 0) {
+          keys.push(key);
+        }
+      }
+      keys.forEach(function (key) {
+        localStorage.removeItem(key);
+      });
+      resetForm();
+      renderAll();
+    });
+
+    // 一覧を表示（新しい日付が上）
+    function renderList() {
+      $("#list").empty();
+      const records = getRecords().reverse();
+
+      records.forEach(function (r) {
+        const html = `
+        <li>
+          <p class="list-date">${r.date.replace(/-/g, "/")}</p>
+          <p>ごはん：${mark(r.appetite)}</p>
+          <p>ご機嫌：${mark(r.energy)}</p>
+          <p>うんち：${mark(r.poop)}</p>
+          <p>おしっこ：${mark(r.pee)}</p>
+          <p>体重：${r.weight ? r.weight + "kg" : "-"}</p>
+          <p>${r.memo}</p>
+        </li>
+      `;
+        $("#list").append(html);
+      });
+    }
+
+    // フォームを空にする
+    function resetForm() {
+      $(".choices input[type='radio']").prop("checked", false);
+      $("#weight").val("");
+      $("#memo").val("");
+    }
+
+    // 選んだ日付の記録があればフォームに読み込む
+    function loadForm(date) {
+      resetForm();
+      const saved = localStorage.getItem(PREFIX + date);
+      if (saved === null) {
+        return;
+      }
+      const r = JSON.parse(saved);
+      $(`input[name="appetite"][value="${r.appetite}"]`).prop("checked", true);
+      $(`input[name="energy"][value="${r.energy}"]`).prop("checked", true);
+      $(`input[name="poop"][value="${r.poop}"]`).prop("checked", true);
+      $(`input[name="pee"][value="${r.pee}"]`).prop("checked", true);
+      $("#weight").val(r.weight);
+      $("#memo").val(r.memo);
+    }
+
+    // 日付を変えたら、その日の記録を読み込む
+    $("#date").on("change", function () {
+      loadForm($(this).val());
+    });
+
+
+    // =========================================
+    // STEP3-1：体重グラフ（canvasで手描き）
+    // =========================================
+    function drawWeightChart() {
+      const canvas = document.getElementById("weight-chart");
+      const ctx = canvas.getContext("2d");
+
+      // 表示サイズに合わせて描画サイズを決める
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+      const w = canvas.width;
+      const h = canvas.height;
+      const pad = 45; // 外側の余白
+
+      ctx.clearRect(0, 0, w, h);
+
+      // 体重が入っている記録だけ、最新14件
+      const data = getRecords().filter(function (r) {
+        return r.weight !== "";
+      }).slice(-14);
+
+      if (data.length === 0) {
+        ctx.fillStyle = "#999";
+        ctx.font = "16px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("体重の記録がまだありません", w / 2, h / 2);
+        return;
+      }
+
+      // 縦軸の範囲（最小〜最大に少し余裕を持たせる）
+      const weights = data.map(function (r) { return Number(r.weight); });
+      let min = Math.min(...weights) - 0.2;
+      let max = Math.max(...weights) + 0.2;
+
+      // 値 → 座標 に変換する関数
+      function getX(i) {
+        if (data.length === 1) return w / 2;
+        return pad + 25 + (w - pad * 2 - 25) * i / (data.length - 1);
+      }
+      function getY(value) {
+        return h - pad - (h - pad * 2) * (value - min) / (max - min);
+      }
+
+      // 目盛り線と数値（3本）
+      ctx.strokeStyle = "#fbe3ea";
+      ctx.fillStyle = "#999";
+      ctx.font = "12px sans-serif";
+      ctx.textAlign = "right";
+      for (let i = 0; i <= 2; i++) {
+        const value = min + (max - min) * i / 2;
+        const y = getY(value);
+        ctx.beginPath();
+        ctx.moveTo(pad, y);
+        ctx.lineTo(w - pad, y);
+        ctx.stroke();
+        ctx.fillText(value.toFixed(1), pad - 6, y + 4);
+      }
+
+      // 折れ線
+      ctx.strokeStyle = "#ff8fab";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      data.forEach(function (r, i) {
+        const x = getX(i);
+        const y = getY(Number(r.weight));
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      ctx.stroke();
+
+      // 点・数値・日付
+      ctx.textAlign = "center";
+      data.forEach(function (r, i) {
+        const x = getX(i);
+        const y = getY(Number(r.weight));
+
+        ctx.fillStyle = "#f0628a";
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#6b4f4f";
+        ctx.fillText(r.weight, x, y - 10);
+
+        // 日付は "11/20" の形で下に表示
+        const parts = r.date.split("-");
+        ctx.fillStyle = "#999";
+        ctx.fillText(Number(parts[1]) + "/" + Number(parts[2]), x, h - pad + 20);
+      });
+    }
+
+    // 画面の幅が変わったら描き直す
+    $(window).on("resize", drawWeightChart);
+
+
+    // =========================================
+    // STEP3-2：カレンダー（記録した日に🐾）
+    // =========================================
+    const today = new Date();
+    let calYear = today.getFullYear();
+    let calMonth = today.getMonth(); // 0=1月, 11=12月
+
+    function renderCalendar() {
+      $("#calendar-title").text(`${calYear}年${calMonth + 1}月`);
+      $("#calendar-body").empty();
+
+      const firstDay = new Date(calYear, calMonth, 1).getDay();      // 1日の曜日
+      const lastDate = new Date(calYear, calMonth + 1, 0).getDate(); // 月末の日
+      const todayStr = toDateStr(today);
+
+      let html = "<tr>";
+
+      // 1日より前の空白マス
+      for (let i = 0; i < firstDay; i++) {
+        html += '<td class="empty"></td>';
+      }
+
+      for (let day = 1; day <= lastDate; day++) {
+        const dateStr = toDateStr(new Date(calYear, calMonth, day));
+        const week = (firstDay + day - 1) % 7; // 0=日曜, 6=土曜
+
+        let classes = [];
+        if (week === 0) classes.push("sun");
+        if (week === 6) classes.push("sat");
+        if (dateStr === todayStr) classes.push("today");
+
+        let paw = "";
+        if (localStorage.getItem(PREFIX + dateStr) !== null) {
+          classes.push("has-record");
+          paw = '<span class="paw">🐾</span>';
+        }
+
+        html += `<td class="${classes.join(" ")}" data-date="${dateStr}">${day}${paw}</td>`;
+
+        // 土曜日まで来たら行を折り返す
+        if (week === 6 && day !== lastDate) {
+          html += "</tr><tr>";
+        }
+      }
+      html += "</tr>";
+
+      $("#calendar-body").append(html);
+    }
+
+    // 前の月・次の月
+    $("#prev-month").on("click", function () {
+      calMonth--;
+      if (calMonth < 0) {
+        calMonth = 11;
+        calYear--;
+      }
+      renderCalendar();
+    });
+
+    $("#next-month").on("click", function () {
+      calMonth++;
+      if (calMonth > 11) {
+        calMonth = 0;
+        calYear++;
+      }
+      renderCalendar();
+    });
+
+    // 日付をタップしたら、その日をフォームに読み込んで上へ戻る
+    // （あとから作られる td なので $(document).on を使う）
+    $(document).on("click", "#calendar-body td[data-date]", function () {
+      const date = $(this).data("date");
+      $("#date").val(date);
+      loadForm(date);
+      $("html, body").animate({ scrollTop: 0 }, 300);
+    });
+
+
+    // =========================================
+    // 3.ページ読み込み時
+    // =========================================
+    $("#date").val(toDateStr(today));
+    loadForm(toDateStr(today));
+    renderAll();
+
+  </script>
+</body>
+
+</html>
